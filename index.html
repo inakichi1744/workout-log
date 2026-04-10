@@ -11,12 +11,13 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{min-height:100%;background:#0a0a0f;color:#e8e4dc;font-family:'Courier New',monospace;overscroll-behavior:none;}
+.app{padding-top:env(safe-area-inset-top);}
 button{cursor:pointer;font-family:inherit;border:none;background:none;}
 select{-webkit-appearance:none;appearance:none;font-family:inherit;}
 input{font-family:inherit;}
 .app{min-height:100vh;background:#0a0a0f;color:#e8e4dc;padding-bottom:130px;}
 /* Header */
-.sticky-header{position:sticky;top:0;z-index:10;background:#0a0a0f;}
+.sticky-header{position:sticky;top:0;z-index:10;background:#0a0a0f;padding-top:env(safe-area-inset-top);}
 .header-box{border-bottom:1px solid #2a2a35;padding:12px 20px 8px;}
 .header-sub{font-size:10px;letter-spacing:0.3em;color:#ff6b35;text-transform:uppercase;margin-bottom:3px;}
 .header-title{font-size:20px;font-weight:900;letter-spacing:0.04em;}
@@ -105,7 +106,7 @@ input{font-family:inherit;}
 .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:#ff6b35;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.1em;white-space:nowrap;box-shadow:0 4px 20px rgba(255,107,53,0.4);z-index:20;opacity:0;transition:opacity 0.3s;pointer-events:none;}
 .toast.show{opacity:1;}
 /* Timer */
-.timer-bar{position:fixed;bottom:0;left:0;right:0;background:#12121a;border-top:1px solid #2a2a35;z-index:15;padding:10px 16px 24px;}
+.timer-bar{position:fixed;bottom:0;left:0;right:0;background:#12121a;border-top:1px solid #2a2a35;z-index:15;padding:10px 16px calc(24px + env(safe-area-inset-bottom));}
 .timer-progress-bg{height:2px;background:#1e1e28;border-radius:1px;margin-bottom:10px;overflow:hidden;}
 .timer-progress{height:100%;border-radius:1px;background:#ff6b35;transition:width 1s linear,background 0.3s;}
 .timer-row{display:flex;align-items:center;gap:10px;}
@@ -118,7 +119,7 @@ input{font-family:inherit;}
 </style>
 </head>
 <body>
-<div class="app" id="app">
+<div class="app" id="app" style="padding-top:env(safe-area-inset-top)">
   <div class="sticky-header">
     <div class="header-box">
       <div class="header-sub">Anytime Fitness 赤羽北店</div>
