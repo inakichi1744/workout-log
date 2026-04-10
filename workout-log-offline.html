@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout Log">
+<meta name="theme-color" content="#0a0a0f">
+<title>Workout Log</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;background:#0a0a0f;color:#e8e4dc;font-family:'Courier New',monospace;overscroll-behavior:none;}
+button{cursor:pointer;font-family:inherit;border:none;background:none;}
+select{-webkit-appearance:none;appearance:none;font-family:inherit;}
+input{font-family:inherit;}
+.app{min-height:100vh;background:#0a0a0f;color:#e8e4dc;padding-bottom:130px;}
+/* Header */
+.sticky-header{position:sticky;top:0;z-index:10;background:#0a0a0f;}
+.header-box{border-bottom:1px solid #2a2a35;padding:12px 20px 8px;}
+.header-sub{font-size:10px;letter-spacing:0.3em;color:#ff6b35;text-transform:uppercase;margin-bottom:3px;}
+.header-title{font-size:20px;font-weight:900;letter-spacing:0.04em;}
+.tabs{display:flex;border-bottom:1px solid #2a2a35;background:#0a0a0f;}
+.tab-btn{flex:1;padding:10px;border:none;background:transparent;color:#999;font-size:13px;letter-spacing:0.1em;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;transition:color 0.2s;}
+.tab-btn.active{color:#ff6b35;border-bottom:2px solid #ff6b35;}
+/* Slide */
+.slide-wrap{overflow-x:clip;}
+.slide-inner{display:flex;width:200%;align-items:flex-start;transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);}
+.slide-inner.history{transform:translateX(-50%);}
+.page{width:50%;padding:20px 16px;box-sizing:border-box;flex-shrink:0;}
+/* Cards */
+.card{background:#12121a;border:1px solid #2a2a35;border-radius:8px;padding:16px;margin-bottom:20px;}
+.card-title{font-size:10px;letter-spacing:0.25em;color:#ff6b35;margin-bottom:14px;text-transform:uppercase;}
+/* Form */
+.form-label{font-size:10px;color:#e8e4dc;letter-spacing:0.15em;display:block;margin-bottom:6px;}
+.form-label-sm{font-size:9px;color:#e8e4dc;letter-spacing:0.1em;display:block;margin-bottom:5px;}
+.form-select{width:100%;background:#12121a;border:1px solid #2a2a35;color:#e8e4dc;padding:10px 28px 10px 12px;border-radius:6px;font-size:14px;font-family:inherit;height:44px;}
+.form-select.empty{color:#555;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.select-wrap{position:relative;}
+.select-wrap select{width:100%;background:#12121a;border:1px solid #2a2a35;color:#e8e4dc;padding:10px 28px 10px 8px;border-radius:6px;font-size:14px;font-family:inherit;text-align:center;height:44px;}
+.select-wrap select.empty{color:#555;}
+.select-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#666;font-size:10px;pointer-events:none;}
+.btn-primary{width:100%;background:#ff6b35;border:none;color:#fff;padding:13px;border-radius:6px;font-size:13px;font-weight:700;letter-spacing:0.15em;cursor:pointer;font-family:inherit;}
+.btn-copy{width:100%;background:transparent;border:1px solid #ff6b35;color:#ff6b35;padding:11px;border-radius:6px;font-size:13px;font-weight:700;letter-spacing:0.1em;cursor:pointer;font-family:inherit;margin-bottom:8px;}
+/* Exercise list */
+.ex-card{margin-bottom:16px;background:#12121a;border:1px solid #2a2a35;border-radius:8px;overflow:hidden;}
+.ex-header{padding:10px 14px;border-bottom:1px solid #2a2a35;display:flex;align-items:center;gap:8px;}
+.muscle-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;}
+.ex-name{font-size:12px;font-weight:700;color:#e8e4dc;}
+/* Swipe row */
+.swipe-container{position:relative;overflow:hidden;max-height:200px;}
+.swipe-container.has-border{border-bottom:1px solid #2a2a35;}
+.swipe-bg{position:absolute;inset:0;background:#c0392b;display:flex;align-items:center;justify-content:flex-end;padding-right:20px;}
+.swipe-bg span{color:#fff;font-size:12px;font-weight:700;letter-spacing:0.12em;}
+.swipe-content{display:flex;align-items:center;padding:10px 14px;background:#12121a;will-change:transform;user-select:none;-webkit-user-select:none;}
+.row-num{font-size:11px;color:#bbb;width:52px;}
+.row-weight{flex:1;font-size:15px;color:#ff6b35;font-weight:700;margin-right:12px;}
+.row-weight-unit{font-size:15px;color:#bbb;margin-left:2px;}
+.row-reps{font-size:15px;color:#ccc;}
+/* Empty */
+.empty-msg{text-align:center;color:#e8e4dc;font-size:13px;padding:30px 0;}
+/* Calendar */
+.cal-card{background:#12121a;border:1px solid #2a2a35;border-radius:10px;padding:16px;margin-bottom:20px;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-nav-btn{background:none;border:none;color:#bbb;font-size:20px;cursor:pointer;padding:0 10px;line-height:1;}
+.cal-nav-center{display:flex;align-items:center;gap:10px;}
+.cal-month{font-size:14px;font-weight:700;color:#e8e4dc;}
+.cal-today-btn{background:none;border:1px solid #ff6b35;color:#ff6b35;font-size:10px;border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;}
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;}
+.cal-week-day{text-align:center;font-size:10px;padding-bottom:4px;font-weight:600;}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-day{display:flex;align-items:center;justify-content:center;padding:3px 0;aspect-ratio:1;cursor:pointer;}
+.cal-day.no-tap{cursor:default;}
+.cal-day-inner{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:13px;border:2px solid transparent;}
+.cal-day-inner.today{background:#ff6b35;color:#fff;font-weight:700;}
+.cal-day-inner.selected{background:#ff6b35;color:#fff;font-weight:700;}
+.cal-day-inner.has-log{border:2px solid #ff6b35;}
+/* History detail */
+.hist-date{font-size:13px;font-weight:700;color:#e8e4dc;margin-bottom:12px;}
+.hist-card{background:#12121a;border:1px solid #2a2a35;border-radius:8px;margin-bottom:12px;overflow:hidden;}
+.hist-row{display:flex;align-items:center;padding:8px 14px;}
+.hist-row.bordered{border-bottom:1px solid #2a2a35;}
+/* Sub tabs */
+.sub-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.sub-tab{flex:1;padding:10px;border-radius:8px;border:none;font-family:inherit;font-size:13px;cursor:pointer;}
+.sub-tab.active{background:#ff6b35;color:#fff;font-weight:700;}
+.sub-tab.inactive{background:#12121a;color:#555;font-weight:400;}
+/* Muscle grid */
+.muscle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.muscle-card{background:#12121a;border-radius:10px;padding:14px;cursor:pointer;}
+.muscle-card-name{font-size:15px;font-weight:700;margin-bottom:8px;}
+.muscle-card-info{font-size:11px;margin-top:4px;}
+.muscle-card-hint{font-size:10px;margin-top:6px;color:#e8e4dc;}
+.back-btn{background:none;border:none;color:#ff6b35;font-size:13px;cursor:pointer;margin-bottom:16px;padding:0;font-family:inherit;}
+.muscle-detail-name{font-size:20px;font-weight:900;}
+.detail-ex-card{background:#12121a;border:1px solid #2a2a35;border-radius:8px;margin-bottom:12px;overflow:hidden;}
+.detail-ex-name{padding:10px 14px;border-bottom:1px solid #2a2a35;font-size:12px;font-weight:700;color:#e8e4dc;}
+.detail-row{display:flex;align-items:center;padding:8px 14px;}
+.detail-row.bordered{border-bottom:1px solid #2a2a35;}
+.detail-date{font-size:11px;color:#e8e4dc;flex:1;}
+.detail-weight-tag{font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.detail-reps-tag{font-size:13px;color:#888;background:#1e1e28;padding:2px 8px;border-radius:4px;margin-left:6px;}
+/* Toast */
+.toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:#ff6b35;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.1em;white-space:nowrap;box-shadow:0 4px 20px rgba(255,107,53,0.4);z-index:20;opacity:0;transition:opacity 0.3s;pointer-events:none;}
+.toast.show{opacity:1;}
+/* Timer */
+.timer-bar{position:fixed;bottom:0;left:0;right:0;background:#12121a;border-top:1px solid #2a2a35;z-index:15;padding:10px 16px 24px;}
+.timer-progress-bg{height:2px;background:#1e1e28;border-radius:1px;margin-bottom:10px;overflow:hidden;}
+.timer-progress{height:100%;border-radius:1px;background:#ff6b35;transition:width 1s linear,background 0.3s;}
+.timer-row{display:flex;align-items:center;gap:10px;}
+.timer-presets{display:flex;gap:4px;}
+.timer-preset-btn{border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;height:34px;width:42px;display:flex;align-items:center;justify-content:center;}
+.timer-display{flex:1;text-align:center;}
+.timer-time{font-size:22px;font-weight:900;letter-spacing:0.05em;}
+.timer-controls{display:flex;gap:6px;}
+.timer-ctrl-btn{border:none;border-radius:6px;width:34px;height:34px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="sticky-header">
+    <div class="header-box">
+      <div class="header-sub">Anytime Fitness 赤羽北店</div>
+      <div class="header-title">WORKOUT LOG</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-log" onclick="switchTab('log')">TODAY'S WORKOUT</button>
+      <button class="tab-btn" id="tab-history" onclick="switchTab('history')">HISTORY / STATS</button>
+    </div>
+  </div>
+
+  <div class="slide-wrap" id="slide-wrap">
+    <div class="slide-inner" id="slide-inner">
+
+      <!-- LOG PAGE -->
+      <div class="page" id="page-log">
+        <div id="log-calendar"></div>
+        <div class="card">
+          <div class="card-title">種目を追加</div>
+          <div style="margin-bottom:12px">
+            <label class="form-label">EXERCISE</label>
+            <select class="form-select empty" id="sel-exercise" onchange="onExerciseChange(this)">
+              <option value="">-- 種目を選択</option>
+            </select>
+          </div>
+          <div class="form-grid">
+            <div>
+              <label class="form-label-sm">WEIGHT (kg)</label>
+              <div class="select-wrap">
+                <select id="sel-weight" class="empty" onchange="onWeightChange(this)">
+                  <option value="">-- kg</option>
+                </select>
+                <span class="select-arrow">▼</span>
+              </div>
+            </div>
+            <div>
+              <label class="form-label-sm">REPS (回)</label>
+              <div class="select-wrap">
+                <select id="sel-reps" class="empty" onchange="onRepsChange(this)">
+                  <option value="">-- 回</option>
+                </select>
+                <span class="select-arrow">▼</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn-copy" id="btn-copy" style="display:none" onclick="copyPrev()"></button>
+          <button class="btn-primary" onclick="addSet()">＋ 追加</button>
+        </div>
+        <div id="log-sets"></div>
+      </div>
+
+      <!-- HISTORY PAGE -->
+      <div class="page" id="page-history">
+        <div class="sub-tabs">
+          <button class="sub-tab active" id="subtab-calendar" onclick="switchSubTab('calendar')">📅 CALENDAR</button>
+          <button class="sub-tab inactive" id="subtab-muscle" onclick="switchSubTab('muscle')">💪 BY MUSCLE</button>
+        </div>
+        <div id="history-content"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- TIMER -->
+  <div class="timer-bar">
+    <div class="timer-progress-bg"><div class="timer-progress" id="timer-progress" style="width:100%"></div></div>
+    <div class="timer-row">
+      <div class="timer-presets" id="timer-presets"></div>
+      <div class="timer-display"><span class="timer-time" id="timer-time">1:30</span></div>
+      <div class="timer-controls">
+        <button class="timer-ctrl-btn" style="background:#1e1e28;color:#bbb;" onclick="resetTimer()">↺</button>
+        <button class="timer-ctrl-btn" id="btn-play" style="background:#ff6b35;color:#fff;font-size:16px;" onclick="toggleTimer()">▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const MUSCLE_GROUPS = {
+  "Chest":["チェストプレス","ペクトラルフライ","デクラインプレス","ベンチプレス"],
+  "Back":["プルダウン","ロー","プルダウン（フリー）","ケーブルマシン","パワーラック","ハーフラック","スミスマシン","懸垂","リアデルトイド"],
+  "Shoulder":["ショルダープレス","ラテラルレイズ","サイドレイズ"],
+  "Arms":["プリチャー"],
+  "Legs":["レッグカール","レッグエクステンション","レッグプレス","レッグプレス（フリー）","ヒップアブダクション","ヒップアダクション"],
+  "Core":["トーソローテーション","アブドミナル"],
+};
+const MUSCLE_COLORS = {
+  "Chest":"#e74c3c","Back":"#3498db","Shoulder":"#9b59b6",
+  "Arms":"#e67e22","Legs":"#27ae60","Core":"#16a085",
+};
+const BODYWEIGHT = ["懸垂"];
+
+function range(start,end,step){const r=[];for(let v=start;v<=end+0.001;v=Math.round((v+step)*10)/10)r.push(v);return r;}
+const M25=range(2.5,80,2.5);
+const ROW_W=range(5,147.5,7.5);
+const LEG_W=range(20,150,5);
+const BAR_W=range(20,120,5);
+const DB2=range(2,24,2);
+const AB_W=range(5,95,7.5);
+
+const WEIGHT_OPTIONS = {
+  "ショルダープレス":M25,"プルダウン":ROW_W,"ロー":ROW_W,
+  "チェストプレス":M25,"ペクトラルフライ":M25,
+  "レッグカール":M25,"レッグエクステンション":M25,
+  "レッグプレス":LEG_W,"ヒップアブダクション":M25,"ヒップアダクション":M25,
+  "トーソローテーション":M25,"アブドミナル":AB_W,
+  "ラテラルレイズ":DB2,"サイドレイズ":DB2,
+  "プルダウン（フリー）":ROW_W,"レッグプレス（フリー）":LEG_W,
+  "デクラインプレス":M25,"プリチャー":M25,
+  "ベンチプレス":BAR_W,"ケーブルマシン":M25,
+  "パワーラック":BAR_W,"ハーフラック":BAR_W,"スミスマシン":BAR_W,
+  "リアデルトイド":M25,
+};
+function getWeightOpts(ex){
+  if(BODYWEIGHT.includes(ex))return["自重"];
+  return WEIGHT_OPTIONS[ex]||M25;
+}
+function getMuscle(ex){
+  for(const[m,exs]of Object.entries(MUSCLE_GROUPS))if(exs.includes(ex))return m;
+  return "その他";
+}
+
+// ========== STATE ==========
+const SK="anytime_workout_logs";
+function loadLogs(){try{return JSON.parse(localStorage.getItem(SK)||"[]");}catch{return[];}}
+function saveLogs(l){localStorage.setItem(SK,JSON.stringify(l));}
+function todayStr(){return new Date().toISOString().split("T")[0];}
+function formatDate(d){const[y,m,day]=d.split("-");return`${y}年${m}月${day}日`;}
+
+let logs=loadLogs();
+let currentDate=todayStr();
+let currentView="log";
+let currentSubTab="calendar";
+let selectedHistDate=null;
+let selectedMuscle=null;
+let form={exercise:"",weight:"",reps:""};
+
+// ========== TIMER ==========
+let timerSec=90,timerLeft=null,timerRunning=false,timerInterval=null;
+const PRESETS=[30,60,90,120,180];
+
+function initTimerPresets(){
+  const el=document.getElementById("timer-presets");
+  el.innerHTML="";
+  PRESETS.forEach(s=>{
+    const b=document.createElement("button");
+    b.className="timer-preset-btn";
+    b.textContent=s>=60?`${s/60}m`:`${s}s`;
+    b.onclick=()=>{timerSec=s;timerLeft=null;stopTimer();renderTimer();};
+    el.appendChild(b);
+  });
+  renderTimer();
+}
+function renderTimer(){
+  const presets=document.querySelectorAll(".timer-preset-btn");
+  presets.forEach((b,i)=>{
+    const s=PRESETS[i];
+    const active=s===timerSec&&!timerRunning&&timerLeft===null;
+    b.style.background=active?"#ff6b35":"#1e1e28";
+    b.style.color=active?"#fff":"#aaa";
+  });
+  const display=timerLeft===null?timerSec:timerLeft;
+  const m=Math.floor(display/60),s=display%60;
+  document.getElementById("timer-time").textContent=`${m}:${String(s).padStart(2,"0")}`;
+  document.getElementById("timer-time").style.color=timerLeft===0?"#e74c3c":timerRunning?"#ff6b35":"#e8e4dc";
+  const pct=timerLeft===null?100:(timerLeft/timerSec)*100;
+  const prog=document.getElementById("timer-progress");
+  prog.style.width=pct+"%";
+  prog.style.background=timerLeft===0?"#e74c3c":"#ff6b35";
+  document.getElementById("btn-play").textContent=timerRunning?"⏸":"▶";
+  document.getElementById("btn-play").style.background=timerRunning?"#2a2a35":"#ff6b35";
+}
+function toggleTimer(){
+  if(timerRunning)stopTimer();
+  else startTimer(timerLeft!==null?timerLeft:timerSec);
+}
+function startTimer(sec){
+  clearInterval(timerInterval);timerLeft=sec;timerRunning=true;
+  timerInterval=setInterval(()=>{
+    timerLeft--;
+    if(timerLeft<=0){timerLeft=0;clearInterval(timerInterval);timerRunning=false;}
+    renderTimer();
+  },1000);
+  renderTimer();
+}
+function stopTimer(){clearInterval(timerInterval);timerRunning=false;timerLeft=null;renderTimer();}
+function resetTimer(){clearInterval(timerInterval);timerRunning=false;timerLeft=timerSec;renderTimer();}
+
+// ========== TOAST ==========
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2000);
+}
+
+// ========== TABS ==========
+function switchTab(v){
+  currentView=v;
+  document.getElementById("tab-log").classList.toggle("active",v==="log");
+  document.getElementById("tab-history").classList.toggle("active",v==="history");
+  const inner=document.getElementById("slide-inner");
+  inner.classList.toggle("history",v==="history");
+}
+function switchSubTab(t){
+  currentSubTab=t;selectedHistDate=null;selectedMuscle=null;
+  document.getElementById("subtab-calendar").classList.toggle("active",t==="calendar");
+  document.getElementById("subtab-calendar").classList.toggle("inactive",t!=="calendar");
+  document.getElementById("subtab-muscle").classList.toggle("active",t==="muscle");
+  document.getElementById("subtab-muscle").classList.toggle("inactive",t!=="muscle");
+  renderHistory();
+}
+
+// ========== SWIPE TABS ==========
+let swipeStartX=null,itemSwiping=false;
+document.getElementById("slide-wrap").addEventListener("touchstart",e=>{swipeStartX=e.touches[0].clientX;},{passive:true});
+document.getElementById("slide-wrap").addEventListener("touchend",e=>{
+  if(itemSwiping)return;
+  const dx=e.changedTouches[0].clientX-swipeStartX;
+  if(Math.abs(dx)>50){
+    if(dx<0&&currentView==="log")switchTab("history");
+    else if(dx>0&&currentView==="history")switchTab("log");
+  }
+});
+
+// ========== FORM ==========
+function initExerciseSelect(){
+  const sel=document.getElementById("sel-exercise");
+  Object.entries(MUSCLE_GROUPS).forEach(([cat,exs])=>{
+    const og=document.createElement("optgroup");
+    og.label=cat;
+    exs.forEach(e=>{
+      const o=document.createElement("option");
+      o.value=e;o.textContent=e;og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+}
+function initRepsSelect(){
+  const sel=document.getElementById("sel-reps");
+  for(let i=1;i<=30;i++){
+    const o=document.createElement("option");
+    o.value=i;o.textContent=`${i} 回`;sel.appendChild(o);
+  }
+}
+function updateWeightSelect(){
+  const sel=document.getElementById("sel-weight");
+  sel.innerHTML='<option value="">-- kg</option>';
+  if(!form.exercise){sel.className="empty";return;}
+  const opts=getWeightOpts(form.exercise);
+  opts.forEach(w=>{
+    const o=document.createElement("option");
+    o.value=w;o.textContent=typeof w==="string"?w:`${w} kg`;
+    sel.appendChild(o);
+  });
+  sel.value=form.weight||"";
+  sel.className=sel.value?"":"empty";
+}
+function onExerciseChange(el){
+  form.exercise=el.value;
+  el.className=el.value?"form-select":"form-select empty";
+  const prev=getPrev(form.exercise);
+  if(prev){form.weight=String(prev.weight);form.reps=String(prev.reps);}
+  else{form.weight="";form.reps="";}
+  updateWeightSelect();
+  const rSel=document.getElementById("sel-reps");
+  rSel.value=form.reps||"";
+  rSel.className=rSel.value?"":"empty";
+  renderCopyBtn();
+}
+function onWeightChange(el){form.weight=el.value;el.className=el.value?"":"empty";}
+function onRepsChange(el){form.reps=el.value;el.className=el.value?"":"empty";}
+function getPrev(exercise){
+  for(const log of logs.filter(l=>l.date!==currentDate)){
+    const f=[...log.sets].reverse().find(s=>s.exercise===exercise);
+    if(f)return f;
+  }return null;
+}
+function renderCopyBtn(){
+  const btn=document.getElementById("btn-copy");
+  const prev=form.exercise?getPrev(form.exercise):null;
+  if(prev){
+    btn.style.display="block";
+    btn.textContent=`↩ 前回をコピー（${prev.weight}${typeof prev.weight==="string"?"":""} × ${prev.reps}回）`;
+  }else{btn.style.display="none";}
+}
+function copyPrev(){
+  const prev=getPrev(form.exercise);
+  if(!prev)return;
+  form.weight=String(prev.weight);form.reps=String(prev.reps);
+  updateWeightSelect();
+  const rSel=document.getElementById("sel-reps");
+  rSel.value=form.reps;rSel.className="";
+}
+function addSet(){
+  if(!form.exercise||!form.weight||!form.reps){showToast("全項目を入力してください");return;}
+  const w=BODYWEIGHT.includes(form.exercise)?"自重":parseFloat(form.weight);
+  const newSet={id:Date.now(),exercise:form.exercise,weight:w,reps:parseInt(form.reps)};
+  const dayLog=logs.find(l=>l.date===currentDate);
+  if(dayLog)dayLog.sets.push(newSet);
+  else logs.unshift({date:currentDate,sets:[newSet]});
+  logs.sort((a,b)=>b.date.localeCompare(a.date));
+  saveLogs(logs);
+  form.weight="";form.reps="";
+  updateWeightSelect();
+  const rSel=document.getElementById("sel-reps");
+  rSel.value="";rSel.className="empty";
+  renderLogSets();
+  renderLogCalendar();
+  showToast("追加しました！");
+}
+function removeSet(id){
+  const dayLog=logs.find(l=>l.date===currentDate);
+  if(!dayLog)return;
+  dayLog.sets=dayLog.sets.filter(s=>s.id!==id);
+  if(dayLog.sets.length===0)logs=logs.filter(l=>l.date!==currentDate);
+  saveLogs(logs);
+  renderLogSets();
+  renderLogCalendar();
+}
+
+// ========== CALENDAR ==========
+function renderCalendar(containerId,selectedDate,onSelect,allTappable){
+  const el=document.getElementById(containerId);
+  const logDates=new Set(logs.map(l=>l.date));
+  let cy=parseInt((selectedDate||todayStr()).split("-")[0]);
+  let cm=parseInt((selectedDate||todayStr()).split("-")[1]);
+  let currentSelected=selectedDate;
+
+  function render(){
+    const days=new Date(cy,cm,0).getDate();
+    const firstDay=new Date(cy,cm-1,1).getDay();
+    const cells=[...Array(firstDay).fill(null),...Array.from({length:days},(_,i)=>i+1)];
+    const WEEK=["SUN","MON","TUE","WED","THU","FRI","SAT"];
+    const todayS=todayStr();
+    const showTodayBtn=cy!==parseInt(todayS.split("-")[0])||cm!==parseInt(todayS.split("-")[1]);
+
+    let html=`<div class="cal-card">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" data-cal-action="prev">‹</button>
+        <div class="cal-nav-center">
+          <span class="cal-month">${cy}年 ${String(cm).padStart(2,"0")}月</span>
+          ${showTodayBtn?`<button class="cal-today-btn" data-cal-action="today">今日</button>`:""}
+        </div>
+        <button class="cal-nav-btn" data-cal-action="next">›</button>
+      </div>
+      <div class="cal-week">
+        ${WEEK.map((w,i)=>`<div class="cal-week-day" style="color:${i===0?"#e74c3c":i===6?"#5b9bd5":"#555"}">${w}</div>`).join("")}
+      </div>
+      <div class="cal-days">`;
+    cells.forEach(d=>{
+      if(!d){html+='<div></div>';return;}
+      const ds=`${cy}-${String(cm).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      const hasLog=logDates.has(ds),isSel=ds===currentSelected,isToday=ds===todayS;
+      const dow=(firstDay+d-1)%7;
+      const tc=dow===0?"#e74c3c":dow===6?"#5b9bd5":"#e8e4dc";
+      const tappable=allTappable||hasLog;
+      let cls="cal-day-inner";
+      if(isSel||isToday)cls+=" selected";
+      else if(hasLog)cls+=" has-log";
+      html+=`<div class="cal-day${tappable?"":" no-tap"}"${tappable?` data-cal-action="select" data-date="${ds}"`:""}> 
+        <span class="${cls}" style="color:${isSel||isToday?"#fff":tc};font-weight:${isToday||isSel?700:400}">${d}</span>
+      </div>`;
+    });
+    html+="</div></div>";
+    el.innerHTML=html;
+
+    // イベント委任でクリック処理
+    el.querySelector(".cal-card").addEventListener("click",e=>{
+      const t=e.target.closest("[data-cal-action]");
+      if(!t)return;
+      const action=t.dataset.calAction;
+      if(action==="prev"){if(cm===1){cy--;cm=12;}else cm--;render();}
+      else if(action==="next"){if(cm===12){cy++;cm=1;}else cm++;render();}
+      else if(action==="today"){const ts=todayStr().split("-");cy=parseInt(ts[0]);cm=parseInt(ts[1]);onSelect(todayStr());render();}
+      else if(action==="select"){currentSelected=t.dataset.date;onSelect(t.dataset.date);render();}
+    });
+  }
+  render();
+}
+
+function renderLogCalendar(){
+  renderCalendar("log-calendar",currentDate,d=>{
+    currentDate=d;renderLogSets();renderLogCalendar();
+  },true);
+}
+
+// ========== LOG SETS ==========
+function renderLogSets(){
+  const el=document.getElementById("log-sets");
+  const dayLog=logs.find(l=>l.date===currentDate);
+  const sets=dayLog?dayLog.sets:[];
+  if(sets.length===0){el.innerHTML='<div class="empty-msg">まだ記録がありません</div>';return;}
+  const grouped={};
+  sets.forEach(s=>{(grouped[s.exercise]=grouped[s.exercise]||[]).push(s);});
+  el.innerHTML=Object.entries(grouped).map(([ex,items])=>{
+    const muscle=getMuscle(ex),color=MUSCLE_COLORS[muscle]||"#ff6b35";
+    return `<div class="ex-card">
+      <div class="ex-header">
+        <span class="muscle-tag" style="color:${color};background:${color}22">${muscle}</span>
+        <span class="ex-name">${ex}</span>
+      </div>
+      ${items.map((s,i)=>`
+        <div class="swipe-container${i<items.length-1?" has-border":""}" id="swipe-${s.id}">
+          <div class="swipe-bg"><span>削除</span></div>
+          <div class="swipe-content" id="sc-${s.id}">
+            <span class="row-num" style="width:60px;font-size:15px;color:#bbb">${i+1}セット</span>
+            <span class="row-weight">${s.weight}<span class="row-weight-unit" style="font-size:15px;color:#bbb;margin-left:2px">${typeof s.weight==="string"?"":"kg"}</span></span>
+            <span class="row-reps" style="color:#ccc;font-size:15px">${s.reps}回</span>
+          </div>
+        </div>`).join("")}
+    </div>`;
+  }).join("");
+  // Attach swipe handlers
+  sets.forEach(s=>attachSwipe(s.id));
+}
+function attachSwipe(id){
+  const container=document.getElementById(`swipe-${id}`);
+  const content=document.getElementById(`sc-${id}`);
+  if(!container||!content)return;
+  let startX=null,startY=null,curX=0,swiping=false,locked=false;
+  const THRESH=60;
+  function getW(){return container.offsetWidth||300;}
+  function setTx(x){curX=x;content.style.transform=`translateX(${x}px)`;}
+  function snapBack(){content.style.transition="transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94)";setTx(0);setTimeout(()=>content.style.transition="",300);}
+  function snapDelete(){
+    content.style.transition="transform 0.25s cubic-bezier(0.4,0,0.2,1)";setTx(-getW());
+    setTimeout(()=>{
+      container.style.transition="max-height 0.25s ease,opacity 0.25s ease";
+      container.style.maxHeight="0px";container.style.opacity="0";
+      setTimeout(()=>removeSet(id),250);
+    },220);
+  }
+  content.addEventListener("touchstart",e=>{
+    if(locked)return;startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+    swiping=false;locked=false;content.style.transition="";
+    itemSwiping=false;
+  },{passive:true});
+  content.addEventListener("touchmove",e=>{
+    if(startX===null)return;
+    const dx=e.touches[0].clientX-startX,dy=e.touches[0].clientY-startY;
+    if(!swiping&&!locked){
+      if(Math.abs(dy)>Math.abs(dx)+4){locked=true;return;}
+      if(Math.abs(dx)>6){swiping=true;itemSwiping=true;}
+    }
+    if(locked||!swiping)return;
+    if(dx>0)return;
+    e.preventDefault();setTx(Math.max(dx,-getW()));
+  },{passive:false});
+  content.addEventListener("touchend",()=>{
+    if(!swiping){locked=false;itemSwiping=false;return;}
+    swiping=false;locked=false;
+    setTimeout(()=>itemSwiping=false,100);
+    if(curX<-THRESH)snapDelete();else snapBack();
+    startX=null;
+  });
+}
+
+// ========== HISTORY ==========
+function renderHistory(){
+  const el=document.getElementById("history-content");
+  if(currentSubTab==="calendar"){renderHistoryCalendar(el);}
+  else{renderMuscleView(el);}
+}
+function renderHistoryCalendar(el){
+  el.innerHTML='<div id="hist-cal"></div><div id="hist-detail"></div>';
+  renderCalendar("hist-cal",selectedHistDate,d=>{
+    selectedHistDate=(d===selectedHistDate)?null:d;
+    renderHistDetail();
+    // カレンダーを再描画して選択状態を反映
+    renderCalendar("hist-cal",selectedHistDate,d2=>{
+      selectedHistDate=(d2===selectedHistDate)?null:d2;
+      renderHistDetail();
+    },false);
+  },false);
+  renderHistDetail();
+}
+function renderHistDetail(){
+  const el=document.getElementById("hist-detail");
+  if(!el)return;
+  if(!selectedHistDate){
+    el.innerHTML=`<div style="text-align:center;color:#888;font-size:13px;padding:16px 0">${logs.length===0?"記録がありません":"トレーニングした日付をタップして詳細を表示"}</div>`;
+    return;
+  }
+  const dayLog=logs.find(l=>l.date===selectedHistDate);
+  if(!dayLog){el.innerHTML="";return;}
+  const grouped={};
+  dayLog.sets.forEach(s=>{(grouped[s.exercise]=grouped[s.exercise]||[]).push(s);});
+  el.innerHTML=`<div class="hist-date">${formatDate(selectedHistDate)}</div>`+
+    Object.entries(grouped).map(([ex,items])=>{
+      const muscle=getMuscle(ex),color=MUSCLE_COLORS[muscle]||"#ff6b35";
+      return `<div class="hist-card">
+        <div class="ex-header" style="border-bottom:1px solid #2a2a35">
+          <span class="muscle-tag" style="color:${color};background:${color}22">${muscle}</span>
+          <span class="ex-name">${ex}</span>
+        </div>
+        ${items.map((s,i)=>`<div class="hist-row${i<items.length-1?" bordered":""}">
+          <span class="row-num" style="width:60px;font-size:15px;color:#bbb">${i+1}セット</span>
+          <span style="flex:1;font-size:14px;color:#ff6b35;font-weight:700">${s.weight}${typeof s.weight==="string"?"":"kg"}</span>
+          <span style="font-size:12px;color:#888">${s.reps}回</span>
+        </div>`).join("")}
+      </div>`;
+    }).join("");
+}
+function renderMuscleView(el){
+  if(selectedMuscle){renderMuscleDetail(el);return;}
+  const stats={};
+  logs.forEach(log=>log.sets.forEach(s=>{
+    const m=getMuscle(s.exercise);
+    if(!stats[m])stats[m]={sessions:new Set(),exercises:{}};
+    stats[m].sessions.add(log.date);
+    if(!stats[m].exercises[s.exercise])stats[m].exercises[s.exercise]=[];
+    stats[m].exercises[s.exercise].push({...s,date:log.date});
+  }));
+  el.innerHTML=`<div style="font-size:10px;letter-spacing:0.2em;color:#666;margin-bottom:12px">SELECT MUSCLE GROUP</div>
+    <div class="muscle-grid">
+      ${Object.keys(MUSCLE_GROUPS).map(m=>{
+        const stat=stats[m],color=MUSCLE_COLORS[m]||"#ff6b35";
+        return `<div class="muscle-card" style="border:1px solid ${color}55" onclick="selectMuscle('${m}')">
+          <div class="muscle-card-name" style="color:${color}">${m}</div>
+          <div class="muscle-card-info" style="color:${stat?"#aaa":"#888"}">${stat?`${stat.sessions.size}日 · ${Object.keys(stat.exercises).length}種目`:"記録なし"}</div>
+          ${stat?`<div class="muscle-card-hint">Tap to view details →</div>`:""}
+        </div>`;
+      }).join("")}
+    </div>`;
+}
+function selectMuscle(m){selectedMuscle=m;renderHistory();}
+function renderMuscleDetail(el){
+  const stats={};
+  logs.forEach(log=>log.sets.forEach(s=>{
+    const m=getMuscle(s.exercise);
+    if(!stats[m])stats[m]={exercises:{}};
+    if(!stats[m].exercises[s.exercise])stats[m].exercises[s.exercise]=[];
+    stats[m].exercises[s.exercise].push({...s,date:log.date});
+  }));
+  const stat=stats[selectedMuscle];
+  const color=MUSCLE_COLORS[selectedMuscle]||"#ff6b35";
+  el.innerHTML=`<button class="back-btn" onclick="selectedMuscle=null;renderHistory()">‹ BACK</button>
+    <div style="background:#12121a;border:1px solid #2a2a35;border-radius:10px;padding:16px;margin-bottom:16px">
+      <div class="muscle-detail-name" style="color:${color}">${selectedMuscle}</div>
+    </div>
+    ${stat?Object.entries(stat.exercises).map(([ex,records])=>`
+      <div class="detail-ex-card">
+        <div class="detail-ex-name">${ex}</div>
+        ${[...records].reverse().slice(0,5).map((r,i)=>`
+          <div class="detail-row${i<Math.min(records.length,5)-1?" bordered":""}">
+            <span class="detail-date">${formatDate(r.date)}</span>
+            <span class="detail-weight-tag" style="color:${color};background:${color}22">${r.weight}${typeof r.weight==="string"?"":""} kg</span>
+            <span class="detail-reps-tag">${r.reps} 回</span>
+          </div>`).join("")}
+      </div>`).join(""):""}`;
+}
+
+// ========== INIT ==========
+initExerciseSelect();
+initRepsSelect();
+initTimerPresets();
+renderLogCalendar();
+renderLogSets();
+renderHistory();
+</script>
+</body>
+</html>
