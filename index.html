@@ -11,14 +11,13 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{min-height:100%;background:#0a0a0f;color:#e8e4dc;font-family:'Courier New',monospace;overscroll-behavior:none;}
-.app{padding-top:env(safe-area-inset-top);}
 button{cursor:pointer;font-family:inherit;border:none;background:none;}
 select{-webkit-appearance:none;appearance:none;font-family:inherit;}
 input{font-family:inherit;}
 .app{min-height:100vh;background:#0a0a0f;color:#e8e4dc;padding-bottom:130px;}
 /* Header */
-.sticky-header{position:sticky;top:0;z-index:10;background:#0a0a0f;padding-top:env(safe-area-inset-top);}
-.header-box{border-bottom:1px solid #2a2a35;padding:12px 20px 8px;}
+.sticky-header{position:sticky;top:0;z-index:10;background:#0a0a0f;}
+.header-box{border-bottom:1px solid #2a2a35;padding:calc(12px + env(safe-area-inset-top)) 20px 8px;}
 .header-sub{font-size:10px;letter-spacing:0.3em;color:#ff6b35;text-transform:uppercase;margin-bottom:3px;}
 .header-title{font-size:20px;font-weight:900;letter-spacing:0.04em;}
 .tabs{display:flex;border-bottom:1px solid #2a2a35;background:#0a0a0f;}
@@ -37,9 +36,9 @@ input{font-family:inherit;}
 .form-label-sm{font-size:9px;color:#e8e4dc;letter-spacing:0.1em;display:block;margin-bottom:5px;}
 .form-select{width:100%;background:#12121a;border:1px solid #2a2a35;color:#e8e4dc;padding:10px 28px 10px 12px;border-radius:6px;font-size:14px;font-family:inherit;height:44px;}
 .form-select.empty{color:#555;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;align-items:center;}
 .select-wrap{position:relative;}
-.select-wrap select{width:100%;background:#12121a;border:1px solid #2a2a35;color:#e8e4dc;padding:10px 28px 10px 8px;border-radius:6px;font-size:14px;font-family:inherit;text-align:center;height:44px;}
+.select-wrap select{width:100%;background:#12121a;border:1px solid #2a2a35;color:#e8e4dc;padding:0 28px 0 8px;border-radius:6px;font-size:14px;font-family:inherit;text-align:center;height:44px;box-sizing:border-box;line-height:44px;display:block;}
 .select-wrap select.empty{color:#555;}
 .select-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#666;font-size:10px;pointer-events:none;}
 .btn-primary{width:100%;background:#ff6b35;border:none;color:#fff;padding:13px;border-radius:6px;font-size:13px;font-weight:700;letter-spacing:0.15em;cursor:pointer;font-family:inherit;}
@@ -119,7 +118,7 @@ input{font-family:inherit;}
 </style>
 </head>
 <body>
-<div class="app" id="app" style="padding-top:env(safe-area-inset-top)">
+<div class="app" id="app">
   <div class="sticky-header">
     <div class="header-box">
       <div class="header-sub">Anytime Fitness 赤羽北店</div>
@@ -371,14 +370,15 @@ function initRepsSelect(){
 }
 function updateWeightSelect(){
   const sel=document.getElementById("sel-weight");
-  sel.innerHTML='<option value="">-- kg</option>';
-  if(!form.exercise){sel.className="empty";return;}
   const opts=getWeightOpts(form.exercise);
-  opts.forEach(w=>{
-    const o=document.createElement("option");
-    o.value=w;o.textContent=typeof w==="string"?w:`${w} kg`;
-    sel.appendChild(o);
-  });
+  let html='<option value="">-- kg</option>';
+  if(form.exercise){
+    opts.forEach(w=>{
+      const label=typeof w==="string"?w:`${w} kg`;
+      html+=`<option value="${w}">${label}</option>`;
+    });
+  }
+  sel.innerHTML=html;
   sel.value=form.weight||"";
   sel.className=sel.value?"":"empty";
 }
