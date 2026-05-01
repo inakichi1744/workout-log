@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -110,28 +109,28 @@ input{font-family:inherit;font-size:16px;}
 
 /* ===== TIMER FINISH OVERLAY ===== */
 .timer-overlay{
-position:fixed;inset:0;z-index:100;
-background:#ff6b35;
-display:flex;flex-direction:column;align-items:center;justify-content:center;
-opacity:0;pointer-events:none;
-transition:opacity 0.4s ease;
+  position:fixed;inset:0;z-index:100;
+  background:#ff6b35;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.4s ease;
 }
 .timer-overlay.show{opacity:1;pointer-events:auto;}
 .timer-overlay-msg{
-color:#fff;font-family:‘Courier New’,monospace;font-weight:900;
-text-align:center;line-height:1.3;
-animation:pulse-msg 1.2s ease-in-out infinite;
+  color:#fff;font-family:'Courier New',monospace;font-weight:900;
+  text-align:center;line-height:1.3;
+  animation:pulse-msg 1.2s ease-in-out infinite;
 }
 .timer-overlay-main{font-size:clamp(28px,8vw,48px);letter-spacing:0.05em;margin-bottom:16px;}
 .timer-overlay-sub{font-size:clamp(13px,3.5vw,18px);letter-spacing:0.2em;opacity:0.85;margin-bottom:14px;}
 .timer-overlay-jp{font-size:clamp(14px,4vw,22px);letter-spacing:0.08em;opacity:0.9;font-weight:700;}
 .timer-overlay-hint{
-position:absolute;bottom:calc(40px + env(safe-area-inset-bottom));
-color:#fff;font-size:12px;letter-spacing:0.15em;opacity:0.6;font-family:‘Courier New’,monospace;
+  position:absolute;bottom:calc(40px + env(safe-area-inset-bottom));
+  color:#fff;font-size:12px;letter-spacing:0.15em;opacity:0.6;font-family:'Courier New',monospace;
 }
 @keyframes pulse-msg{
-0%,100%{transform:scale(1);}
-50%{transform:scale(1.04);}
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.04);}
 }
 
 /* ===== BACKUP / RESTORE ===== */
@@ -143,7 +142,6 @@ color:#fff;font-size:12px;letter-spacing:0.15em;opacity:0.6;font-family:‘Couri
 .btn-import{flex:1;background:transparent;border:1px solid #ff6b35;color:#ff6b35;padding:11px;border-radius:6px;font-size:12px;font-weight:700;letter-spacing:0.1em;cursor:pointer;font-family:inherit;}
 .backup-stats{font-size:11px;color:#555;margin-top:10px;text-align:center;}
 </style>
-
 </head>
 <body>
 <div class="app" id="app">
@@ -201,35 +199,31 @@ color:#fff;font-size:12px;letter-spacing:0.15em;opacity:0.6;font-family:‘Couri
         <div id="log-sets"></div>
       </div>
 
-```
-  <div class="page" id="page-history">
-    <div class="sub-tabs">
-      <button class="sub-tab active" id="subtab-calendar" onclick="switchSubTab('calendar')">📅 CALENDAR</button>
-      <button class="sub-tab inactive" id="subtab-muscle" onclick="switchSubTab('muscle')">💪 BY MUSCLE</button>
-    </div>
-    <div id="history-content"></div>
-  </div>
-  <div class="page" id="page-data">
-    <div class="backup-card">
-      <div class="backup-title">DATA BACKUP</div>
-      <div class="backup-desc">ログデータをJSONファイルとして保存・復元できます。<br>機種変更や端末の初期化前にエクスポートしてください。</div>
-      <div class="backup-btns">
-        <button class="btn-export" onclick="exportLogs()">⬇ エクスポート</button>
-        <button class="btn-import" onclick="document.getElementById('import-input').click()">⬆ インポート</button>
+      <div class="page" id="page-history">
+        <div class="sub-tabs">
+          <button class="sub-tab active" id="subtab-calendar" onclick="switchSubTab('calendar')">📅 CALENDAR</button>
+          <button class="sub-tab inactive" id="subtab-muscle" onclick="switchSubTab('muscle')">💪 BY MUSCLE</button>
+        </div>
+        <div id="history-content"></div>
       </div>
-      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importLogs(this)">
-      <div class="backup-stats" id="backup-stats"></div>
+      <div class="page" id="page-data">
+        <div class="backup-card">
+          <div class="backup-title">DATA BACKUP</div>
+          <div class="backup-desc">ログデータをJSONファイルとして保存・復元できます。<br>機種変更や端末の初期化前にエクスポートしてください。</div>
+          <div class="backup-btns">
+            <button class="btn-export" onclick="exportLogs()">⬇ エクスポート</button>
+            <button class="btn-import" onclick="document.getElementById('import-input').click()">⬆ インポート</button>
+          </div>
+          <input type="file" id="import-input" accept=".json" style="display:none" onchange="importLogs(this)">
+          <div class="backup-stats" id="backup-stats"></div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-```
-
   </div>
 
   <div class="toast" id="toast"></div>
 
   <!-- TIMER FINISH OVERLAY -->
-
   <div class="timer-overlay" id="timer-overlay" onclick="dismissOverlay()">
     <div class="timer-overlay-msg">
       <div class="timer-overlay-main" id="overlay-main"></div>
@@ -724,6 +718,5 @@ renderLogSets();
 renderHistory();
 updateBackupStats();
 </script>
-
 </body>
 </html>
