@@ -149,7 +149,6 @@ input{font-family:inherit;font-size:16px;}
     <div class="header-box">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;">
         <div>
-          <div class="header-sub">Anytime Fitness 赤羽北店</div>
           <div class="header-title">WORKOUT LOG</div>
         </div>
         <button id="btn-data" onclick="switchTab('data')" style="margin-top:4px;background:#1e1e28;border:1px solid #2a2a35;color:#888;font-size:11px;font-weight:700;letter-spacing:0.15em;padding:6px 12px;border-radius:6px;font-family:inherit;">DATA</button>
@@ -261,6 +260,8 @@ const MUSCLE_COLORS = {
   "Arms":"#e67e22","Legs":"#27ae60","Core":"#16a085",
 };
 const BODYWEIGHT = ["懸垂"];
+const REPS_MAX = {"アブドミナル":50,"トーソローテーション":50};
+function getRepsMax(ex){return REPS_MAX[ex]||30;}
 
 function range(start,end,step){
   const r=[];for(let v=start;v<=end+0.001;v=Math.round((v+step)*100)/100)r.push(v);return r;
@@ -462,9 +463,13 @@ function initExerciseSelect(){
     sel.appendChild(og);
   });
 }
-function initRepsSelect(){
-  const sel=document.getElementById("sel-reps");
-  for(let i=1;i<=30;i++){const o=document.createElement("option");o.value=i;o.textContent=`${i} 回`;sel.appendChild(o);}
+function updateRepsSelect(){
+  const sel=document.getElementById("sel-reps"),max=getRepsMax(form.exercise);
+  let html='<option value="">--</option>';
+  for(let i=1;i<=max;i++)html+=`<option value="${i}">${i} 回</option>`;
+  sel.innerHTML=html;
+  if(form.reps&&parseInt(form.reps)>max)form.reps="";
+  sel.value=form.reps||"";sel.className=sel.value?"":"empty";
 }
 function updateWeightSelect(){
   const sel=document.getElementById("sel-weight"),opts=getWeightOpts(form.exercise);
@@ -478,7 +483,7 @@ function onExerciseChange(el){
   if(prev){form.weight=String(prev.weight);form.reps=String(prev.reps);}
   else{form.weight="";form.reps="";}
   updateWeightSelect();
-  const rSel=document.getElementById("sel-reps");rSel.value=form.reps||"";rSel.className=rSel.value?"":"empty";
+  updateRepsSelect();
   renderCopyBtn();
 }
 function onWeightChange(el){form.weight=el.value;el.className=el.value?"":"empty";}
@@ -497,7 +502,7 @@ function copyPrev(){
   const prev=getPrev(form.exercise);if(!prev)return;
   form.weight=String(prev.weight);form.reps=String(prev.reps);
   updateWeightSelect();
-  const rSel=document.getElementById("sel-reps");rSel.value=form.reps;rSel.className="";
+  updateRepsSelect();
 }
 function addSet(){
   if(!form.exercise||!form.weight||!form.reps){showToast("全項目を入力してください");return;}
@@ -711,7 +716,7 @@ function updateBackupStats(){
 }
 // ========== INIT ==========
 initExerciseSelect();
-initRepsSelect();
+updateRepsSelect();
 initTimerPresets();
 renderLogCalendar();
 renderLogSets();
